@@ -1,0 +1,1707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeConnect - Admin Dashboard</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        .header {
+            background: #111827;
+            color: white;
+            padding: 18px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .header span {
+            font-size: 14px;
+            opacity: 0.85;
+        }
+
+        .container {
+            width: 94%;
+            max-width: 1400px;
+            margin: 30px auto;
+        }
+
+        .welcome {
+            margin-bottom: 25px;
+        }
+
+        .welcome h2 {
+            font-size: 28px;
+            margin-bottom: 6px;
+        }
+
+        .welcome p {
+            color: #6b7280;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 14px;
+            padding: 22px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+            border-left: 5px solid #2563eb;
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .number {
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .pending {
+            border-left-color: #f59e0b;
+        }
+
+        .review {
+            border-left-color: #8b5cf6;
+        }
+
+        .progress {
+            border-left-color: #3b82f6;
+        }
+
+        .resolved {
+            border-left-color: #10b981;
+        }
+
+        .escalated {
+            border-left-color: #ef4444;
+        }
+
+        .high {
+            border-left-color: #dc2626;
+        }
+
+        .section {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+        }
+
+        .section h2 {
+            margin-bottom: 20px;
+            font-size: 21px;
+        }
+
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .category-card {
+            background: #f8fafc;
+            padding: 18px;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .category-card strong {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .category-card span {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+
+        th,
+        td {
+            padding: 13px 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background: #f8fafc;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        td {
+            font-size: 14px;
+        }
+
+        .description {
+            max-width: 260px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .status {
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-review {
+            background: #ede9fe;
+            color: #5b21b6;
+        }
+
+        .status-progress {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-resolved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-escalated {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .priority-high {
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        .priority-medium {
+            color: #d97706;
+            font-weight: bold;
+        }
+
+        .priority-low {
+            color: #059669;
+            font-weight: bold;
+        }
+
+        select {
+            padding: 7px 9px;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+            background: white;
+            cursor: pointer;
+        }
+
+        button {
+            border: none;
+            padding: 8px 12px;
+            border-radius: 7px;
+            background: #2563eb;
+            color: white;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .logout-btn {
+            background: #dc2626;
+            padding: 9px 15px;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6b7280;
+        }
+
+        .user-role {
+            padding: 5px 9px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .role-admin {
+            background: #ede9fe;
+            color: #5b21b6;
+        }
+
+        .role-citizen {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* SOS MONITORING */
+
+        .sos-section {
+            border-left: 5px solid #dc2626;
+        }
+
+        .sos-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .sos-header h2 {
+            margin-bottom: 0;
+        }
+
+        .sos-refresh {
+            background: #dc2626;
+            padding: 9px 15px;
+            font-weight: bold;
+        }
+
+        .sos-active {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .sos-resolved {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .map-link {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .map-link:hover {
+            text-decoration: underline;
+        }
+
+        .sos-empty {
+            text-align: center;
+            padding: 25px;
+            color: #6b7280;
+        }
+
+        @media (max-width: 700px) {
+            .header {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 19px;
+            }
+
+            .container {
+                width: 95%;
+                margin: 20px auto;
+            }
+
+            .welcome h2 {
+                font-size: 23px;
+            }
+
+            .section {
+                padding: 17px;
+            }
+
+            .sos-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="header">
+
+    <div>
+        <h1>🛡️ SafeConnect</h1>
+        <span>Admin Control Center</span>
+    </div>
+
+    <button class="logout-btn" onclick="logout()">
+        Logout
+    </button>
+
+</header>
+
+
+<main class="container">
+
+    <div class="welcome">
+
+        <h2>Admin Dashboard</h2>
+
+        <p>
+            Monitor complaints, users, priorities and resolution status.
+        </p>
+
+    </div>
+
+
+    <div id="message" class="message"></div>
+
+
+    <!-- Complaint Statistics -->
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <h3>Total Complaints</h3>
+            <div class="number" id="totalComplaints">0</div>
+        </div>
+
+        <div class="stat-card pending">
+            <h3>Pending</h3>
+            <div class="number" id="pendingComplaints">0</div>
+        </div>
+
+        <div class="stat-card review">
+            <h3>Under Review</h3>
+            <div class="number" id="underReviewComplaints">0</div>
+        </div>
+
+        <div class="stat-card progress">
+            <h3>In Progress</h3>
+            <div class="number" id="inProgressComplaints">0</div>
+        </div>
+
+        <div class="stat-card resolved">
+            <h3>Resolved</h3>
+            <div class="number" id="resolvedComplaints">0</div>
+        </div>
+
+        <div class="stat-card escalated">
+            <h3>Escalated</h3>
+            <div class="number" id="escalatedComplaints">0</div>
+        </div>
+
+        <div class="stat-card high">
+            <h3>High Priority</h3>
+            <div class="number" id="highPriorityComplaints">0</div>
+        </div>
+
+    </div>
+
+
+    <!-- AI Categories -->
+
+    <section class="section">
+
+        <h2>🤖 AI Complaint Categories</h2>
+
+        <div id="categories" class="categories">
+
+            <div class="loading">
+                Loading categories...
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- Users -->
+
+    <section class="section">
+
+        <h2>👥 Registered Users</h2>
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Role</th>
+                        <th>Registered On</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="usersTable">
+
+                    <tr>
+
+                        <td colspan="6" class="loading">
+                            Loading users...
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- Emergency SOS Monitoring -->
+
+    <section class="section sos-section">
+
+        <div class="sos-header">
+
+            <h2>🚨 Emergency SOS Alerts</h2>
+
+            <button
+                class="sos-refresh"
+                onclick="loadEmergencyAlerts()"
+            >
+                🔄 Refresh Alerts
+            </button>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Alert ID</th>
+                        <th>User ID</th>
+                        <th>Location</th>
+                        <th>Message</th>
+                        <th>Status</th>
+                        <th>Created On</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="emergencyAlertsTable">
+
+                    <tr>
+
+                        <td colspan="6" class="loading">
+                            Loading emergency alerts...
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- Complaints -->
+
+    <section class="section">
+
+        <h2>📋 All Complaints</h2>
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>AI Category</th>
+                        <th>Priority</th>
+                        <th>Location</th>
+                        <th>Authority</th>
+                        <th>Status</th>
+                        <th>Update</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="complaintsTable">
+
+                    <tr>
+
+                        <td colspan="9" class="loading">
+                            Loading complaints...
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script>
+
+const API_URL = "http://127.0.0.1:8000";
+
+const token = localStorage.getItem("safeconnect_token");
+
+
+if (!token) {
+
+    window.location.href = "login.html";
+
+}
+
+
+// Message
+
+function showMessage(text, type) {
+
+    const message =
+        document.getElementById("message");
+
+    message.textContent = text;
+
+    message.className =
+        "message " + type;
+
+    message.style.display = "block";
+
+    setTimeout(() => {
+
+        message.style.display = "none";
+
+    }, 3000);
+
+}
+
+
+// HTML safety
+
+function escapeHtml(value) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+
+        return "";
+
+    }
+
+    return String(value)
+
+        .replace(/&/g, "&amp;")
+
+        .replace(/</g, "&lt;")
+
+        .replace(/>/g, "&gt;")
+
+        .replace(/"/g, "&quot;")
+
+        .replace(/'/g, "&#039;");
+
+}
+
+
+// Verify Admin
+
+async function verifyAdmin() {
+
+    try {
+
+        const response = await fetch(
+
+            `${API_URL}/users/profile`,
+
+            {
+
+                headers: {
+
+                    "Authorization":
+                        `Bearer ${token}`
+
+                }
+
+            }
+
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Authentication failed"
+            );
+
+        }
+
+
+        const user =
+            await response.json();
+
+
+        if (user.role !== "admin") {
+
+            alert(
+                "Access denied. Admin account required."
+            );
+
+            window.location.href =
+                "dashboard.html";
+
+            return false;
+
+        }
+
+
+        return true;
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        localStorage.removeItem(
+            "safeconnect_token"
+        );
+
+        window.location.href =
+            "login.html";
+
+        return false;
+
+    }
+
+}
+
+
+// Load dashboard
+
+async function loadDashboard() {
+
+    try {
+
+        const response = await fetch(
+
+            `${API_URL}/admin/dashboard`,
+
+            {
+
+                headers: {
+
+                    "Authorization":
+                        `Bearer ${token}`
+
+                }
+
+            }
+
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Failed to load dashboard"
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        document.getElementById(
+            "totalComplaints"
+        ).textContent =
+            data.total_complaints;
+
+
+        document.getElementById(
+            "pendingComplaints"
+        ).textContent =
+            data.pending_complaints;
+
+
+        document.getElementById(
+            "underReviewComplaints"
+        ).textContent =
+            data.under_review_complaints;
+
+
+        document.getElementById(
+            "inProgressComplaints"
+        ).textContent =
+            data.in_progress_complaints;
+
+
+        document.getElementById(
+            "resolvedComplaints"
+        ).textContent =
+            data.resolved_complaints;
+
+
+        document.getElementById(
+            "escalatedComplaints"
+        ).textContent =
+            data.escalated_complaints;
+
+
+        document.getElementById(
+            "highPriorityComplaints"
+        ).textContent =
+            data.high_priority_complaints;
+
+
+        const categoriesContainer =
+            document.getElementById(
+                "categories"
+            );
+
+
+        categoriesContainer.innerHTML =
+            "";
+
+
+        const categories =
+            data.category_statistics || {};
+
+
+        if (
+            Object.keys(categories).length === 0
+        ) {
+
+            categoriesContainer.innerHTML =
+                "<p>No AI category data available.</p>";
+
+        } else {
+
+            Object.entries(categories).forEach(
+                ([category, count]) => {
+
+                    const card =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    card.className =
+                        "category-card";
+
+
+                    card.innerHTML = `
+
+                        <strong>
+                            ${escapeHtml(category)}
+                        </strong>
+
+                        <span>
+                            ${count}
+                        </span>
+
+                    `;
+
+
+                    categoriesContainer
+                        .appendChild(card);
+
+                }
+            );
+
+        }
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+            "Unable to load admin dashboard.",
+            "error"
+        );
+
+    }
+
+}
+
+
+// Load Users
+
+async function loadUsers() {
+
+    try {
+
+        const response = await fetch(
+
+            `${API_URL}/admin/users`,
+
+            {
+
+                headers: {
+
+                    "Authorization":
+                        `Bearer ${token}`
+
+                }
+
+            }
+
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Failed to load users"
+            );
+
+        }
+
+
+        const users =
+            await response.json();
+
+
+        const table =
+            document.getElementById(
+                "usersTable"
+            );
+
+
+        table.innerHTML = "";
+
+
+        if (users.length === 0) {
+
+            table.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="6"
+                        class="loading"
+                    >
+                        No users found.
+                    </td>
+
+                </tr>
+
+            `;
+
+            return;
+
+        }
+
+
+        users.forEach(user => {
+
+            const row =
+                document.createElement("tr");
+
+
+            const roleClass =
+                user.role === "admin"
+                    ? "role-admin"
+                    : "role-citizen";
+
+
+            const createdDate =
+                user.created_at
+
+                    ? new Date(
+                        user.created_at
+                    ).toLocaleDateString()
+
+                    : "N/A";
+
+
+            row.innerHTML = `
+
+                <td>
+                    #${user.id}
+                </td>
+
+                <td>
+
+                    <strong>
+                        ${escapeHtml(
+                            user.full_name
+                        )}
+                    </strong>
+
+                </td>
+
+                <td>
+                    ${escapeHtml(
+                        user.email
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHtml(
+                        user.phone ||
+                        "Not provided"
+                    )}
+                </td>
+
+                <td>
+
+                    <span
+                        class="user-role ${roleClass}"
+                    >
+                        ${escapeHtml(
+                            user.role
+                        )}
+                    </span>
+
+                </td>
+
+                <td>
+                    ${createdDate}
+                </td>
+
+            `;
+
+
+            table.appendChild(row);
+
+        });
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+            "Unable to load users.",
+            "error"
+        );
+
+    }
+
+}
+
+
+// Load Emergency SOS Alerts
+
+async function loadEmergencyAlerts() {
+
+    try {
+
+        const table =
+            document.getElementById(
+                "emergencyAlertsTable"
+            );
+
+
+        table.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="6"
+                    class="loading"
+                >
+                    Loading emergency alerts...
+                </td>
+
+            </tr>
+
+        `;
+
+
+        const response = await fetch(
+
+            `${API_URL}/admin/emergency-alerts`,
+
+            {
+
+                headers: {
+
+                    "Authorization":
+                        `Bearer ${token}`
+
+                }
+
+            }
+
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Failed to load emergency alerts"
+            );
+
+        }
+
+
+        const alerts =
+            await response.json();
+
+
+        table.innerHTML = "";
+
+
+        if (
+            !alerts ||
+            alerts.length === 0
+        ) {
+
+            table.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="6"
+                        class="sos-empty"
+                    >
+                        🚨 No emergency SOS alerts found.
+                    </td>
+
+                </tr>
+
+            `;
+
+            return;
+
+        }
+
+
+        alerts.forEach(alert => {
+
+            const row =
+                document.createElement("tr");
+
+
+            const createdDate =
+                alert.created_at
+
+                    ? new Date(
+                        alert.created_at
+                    ).toLocaleString()
+
+                    : "N/A";
+
+
+            const latitude =
+                Number(alert.latitude)
+                    .toFixed(6);
+
+
+            const longitude =
+                Number(alert.longitude)
+                    .toFixed(6);
+
+
+            const mapUrl =
+                `https://www.google.com/maps?q=${encodeURIComponent(
+                    alert.latitude
+                )},${encodeURIComponent(
+                    alert.longitude
+                )}`;
+
+
+            const status =
+                alert.status || "ACTIVE";
+
+
+            const statusClass =
+                status === "ACTIVE"
+                    ? "sos-active"
+                    : "sos-resolved";
+
+
+            row.innerHTML = `
+
+                <td>
+                    #${escapeHtml(alert.id)}
+                </td>
+
+                <td>
+                    #${escapeHtml(alert.user_id)}
+                </td>
+
+                <td>
+
+                    <a
+                        class="map-link"
+                        href="${mapUrl}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        📍 ${latitude},
+                        ${longitude}
+                    </a>
+
+                </td>
+
+                <td>
+                    ${escapeHtml(
+                        alert.message ||
+                        "Emergency assistance required"
+                    )}
+                </td>
+
+                <td>
+
+                    <span class="${statusClass}">
+                        ${escapeHtml(status)}
+                    </span>
+
+                </td>
+
+                <td>
+                    ${escapeHtml(createdDate)}
+                </td>
+
+            `;
+
+
+            table.appendChild(row);
+
+        });
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        const table =
+            document.getElementById(
+                "emergencyAlertsTable"
+            );
+
+
+        table.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="6"
+                    class="loading"
+                >
+                    Unable to load emergency alerts.
+                </td>
+
+            </tr>
+
+        `;
+
+
+        showMessage(
+            "Unable to load emergency SOS alerts.",
+            "error"
+        );
+
+    }
+
+}
+
+
+// Load Complaints
+
+async function loadComplaints() {
+
+    try {
+
+        const response = await fetch(
+
+            `${API_URL}/complaints/all`,
+
+            {
+
+                headers: {
+
+                    "Authorization":
+                        `Bearer ${token}`
+
+                }
+
+            }
+
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Failed to load complaints"
+            );
+
+        }
+
+
+        const complaints =
+            await response.json();
+
+
+        const table =
+            document.getElementById(
+                "complaintsTable"
+            );
+
+
+        table.innerHTML = "";
+
+
+        if (complaints.length === 0) {
+
+            table.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="9"
+                        class="loading"
+                    >
+                        No complaints found.
+                    </td>
+
+                </tr>
+
+            `;
+
+            return;
+
+        }
+
+
+        complaints.forEach(
+            complaint => {
+
+                const row =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                const aiCategory =
+                    complaint.ai_category ||
+                    complaint.category ||
+                    "General";
+
+
+                row.innerHTML = `
+
+                    <td>
+                        #${complaint.id}
+                    </td>
+
+                    <td>
+
+                        <strong>
+                            ${escapeHtml(
+                                complaint.title
+                            )}
+                        </strong>
+
+                    </td>
+
+                    <td>
+
+                        <div
+                            class="description"
+                            title="${escapeHtml(
+                                complaint.description
+                            )}"
+                        >
+                            ${escapeHtml(
+                                complaint.description
+                            )}
+                        </div>
+
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            aiCategory
+                        )}
+                    </td>
+
+                    <td>
+
+                        <span
+                            class="${getPriorityClass(
+                                complaint.priority
+                            )}"
+                        >
+                            ${escapeHtml(
+                                complaint.priority ||
+                                "Medium"
+                            )}
+                        </span>
+
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            complaint.location ||
+                            "Not provided"
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            complaint.authority ||
+                            "Not assigned"
+                        )}
+                    </td>
+
+                    <td>
+
+                        <span
+                            class="status ${getStatusClass(
+                                complaint.status
+                            )}"
+                        >
+                            ${escapeHtml(
+                                complaint.status
+                            )}
+                        </span>
+
+                    </td>
+
+                    <td>
+
+                        <select
+                            id="status-${complaint.id}"
+                        >
+
+                            <option
+                                value="Pending"
+                                ${complaint.status ===
+                                    "Pending"
+                                    ? "selected"
+                                    : ""}
+                            >
+                                Pending
+                            </option>
+
+                            <option
+                                value="Under Review"
+                                ${complaint.status ===
+                                    "Under Review"
+                                    ? "selected"
+                                    : ""}
+                            >
+                                Under Review
+                            </option>
+
+                            <option
+                                value="In Progress"
+                                ${complaint.status ===
+                                    "In Progress"
+                                    ? "selected"
+                                    : ""}
+                            >
+                                In Progress
+                            </option>
+
+                            <option
+                                value="Resolved"
+                                ${complaint.status ===
+                                    "Resolved"
+                                    ? "selected"
+                                    : ""}
+                            >
+                                Resolved
+                            </option>
+
+                            <option
+                                value="Escalated"
+                                ${complaint.status ===
+                                    "Escalated"
+                                    ? "selected"
+                                    : ""}
+                            >
+                                Escalated
+                            </option>
+
+                        </select>
+
+
+                        <button
+                            onclick="updateStatus(
+                                ${complaint.id}
+                            )"
+                        >
+                            Update
+                        </button>
+
+                    </td>
+
+                `;
+
+
+                table.appendChild(row);
+
+            }
+        );
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+            "Unable to load complaints.",
+            "error"
+        );
+
+    }
+
+}
+
+
+// Update Status
+
+async function updateStatus(complaintId) {
+
+    const select =
+        document.getElementById(
+            `status-${complaintId}`
+        );
+
+
+    const status =
+        select.value;
+
+
+    try {
+
+        const response = await fetch(
+
+            `${API_URL}/complaints/${complaintId}/status?status=${encodeURIComponent(
+                status
+            )}`,
+
+            {
+
+                method: "PUT",
+
+                headers: {
+
+                    "Authorization":
+                        `Bearer ${token}`
+
+                }
+
+            }
+
+        );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.detail ||
+                "Failed to update status"
+            );
+
+        }
+
+
+        showMessage(
+            "Complaint status updated successfully.",
+            "success"
+        );
+
+
+        await loadDashboard();
+
+        await loadComplaints();
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+            error.message,
+            "error"
+        );
+
+    }
+
+}
+
+
+// Status classes
+
+function getStatusClass(status) {
+
+    switch (status) {
+
+        case "Pending":
+            return "status-pending";
+
+        case "Under Review":
+            return "status-review";
+
+        case "In Progress":
+            return "status-progress";
+
+        case "Resolved":
+            return "status-resolved";
+
+        case "Escalated":
+            return "status-escalated";
+
+        default:
+            return "status-pending";
+
+    }
+
+}
+
+
+// Priority classes
+
+function getPriorityClass(priority) {
+
+    switch (priority) {
+
+        case "High":
+            return "priority-high";
+
+        case "Low":
+            return "priority-low";
+
+        default:
+            return "priority-medium";
+
+    }
+
+}
+
+
+// Logout
+
+function logout() {
+
+    localStorage.removeItem(
+        "safeconnect_token"
+    );
+
+    window.location.href =
+        "login.html";
+
+}
+
+
+// Initialize
+
+async function initializeAdminDashboard() {
+
+    const isAdmin =
+        await verifyAdmin();
+
+
+    if (!isAdmin) {
+
+        return;
+
+    }
+
+
+    await loadDashboard();
+
+    await loadUsers();
+
+    await loadEmergencyAlerts();
+
+    await loadComplaints();
+
+}
+
+
+initializeAdminDashboard();
+
+</script>
+
+</body>
+</html>

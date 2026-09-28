@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AI Assistant | SafeConnect</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+
+<body>
+
+<div class="ai-page">
+
+<a href="index.html" class="back-home">
+<i class="fa-solid fa-arrow-left"></i>
+Home
+</a>
+
+<div class="ai-title">
+
+<h1>
+🤖 SafeConnect AI Assistant
+</h1>
+
+<p>
+Get instant safety guidance, legal support and grievance help
+</p>
+
+</div>
+
+
+<div class="chat-container">
+
+<div class="chat-header">
+
+<i class="fa-solid fa-robot"></i>
+
+SafeConnect AI
+
+<span>
+Online
+</span>
+
+</div>
+
+
+<div class="chat-body" id="chatBox">
+
+<div class="bot-message">
+Hello! I am SafeConnect AI.
+How can I help you today?
+</div>
+
+</div>
+
+
+<div class="chat-input">
+
+<input
+id="userInput"
+placeholder="Type your problem..."
+onkeydown="handleEnter(event)"
+>
+
+<button onclick="sendMessage()">
+
+<i class="fa-solid fa-paper-plane"></i>
+
+</button>
+
+</div>
+
+</div>
+
+
+<div class="grievance-box">
+
+<h2>
+Submit Grievance
+</h2>
+
+<p>
+For detailed complaints, use the complaint registration page.
+</p>
+
+<a href="complaint.html">
+
+<button>
+<i class="fa-solid fa-file-circle-plus"></i>
+Submit Complaint
+</button>
+
+</a>
+
+</div>
+
+
+</div>
+
+
+<script>
+
+const API_URL = "http://127.0.0.1:8000";
+
+const token =
+localStorage.getItem("safeconnect_token");
+
+
+function addMessage(text, className) {
+
+    const chatBox =
+        document.getElementById("chatBox");
+
+    const message =
+        document.createElement("div");
+
+    message.className = className;
+
+    message.innerText = text;
+
+    chatBox.appendChild(message);
+
+    chatBox.scrollTop =
+        chatBox.scrollHeight;
+
+}
+
+
+function handleEnter(event) {
+
+    if (event.key === "Enter") {
+
+        sendMessage();
+
+    }
+
+}
+
+
+async function sendMessage() {
+
+    const input =
+        document.getElementById("userInput");
+
+    const question =
+        input.value.trim();
+
+
+    if (!question) {
+
+        return;
+
+    }
+
+
+    if (!token) {
+
+        alert(
+            "Please login to use SafeConnect AI."
+        );
+
+        window.location.href =
+            "login.html";
+
+        return;
+
+    }
+
+
+    addMessage(
+        question,
+        "user-message"
+    );
+
+    input.value = "";
+
+
+    addMessage(
+        "SafeConnect AI is analyzing your request...",
+        "bot-message"
+    );
+
+
+    const chatBox =
+        document.getElementById("chatBox");
+
+    const loadingMessage =
+        chatBox.lastElementChild;
+
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_URL}/legal/ask`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Authorization":
+                            `Bearer ${token}`,
+
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        question: question
+                    })
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.detail ||
+                "AI request failed"
+            );
+
+        }
+
+
+        const answer =
+            data.answer ||
+            data.response ||
+            data.message ||
+            "I could not generate a response.";
+
+
+        loadingMessage.innerText =
+            answer;
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AI Assistant Error:",
+            error
+        );
+
+        loadingMessage.innerText =
+            "Unable to connect to SafeConnect AI. Please try again.";
+
+    }
+
+}
+
+</script>
+
+</body>
+
+</html>

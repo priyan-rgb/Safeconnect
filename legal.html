@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Legal Assistance | SafeConnect</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+
+<body>
+
+<div class="legal-page">
+
+<a href="index.html" class="back-home">
+<i class="fa-solid fa-arrow-left"></i>
+Home
+</a>
+
+<div class="legal-header">
+
+<h1>
+⚖️ AI Legal Assistance
+</h1>
+
+<p>
+Get guidance, information and support for your legal concerns
+</p>
+
+</div>
+
+
+<div class="legal-cards">
+
+<div class="legal-card">
+
+<i class="fa-solid fa-scale-balanced"></i>
+
+<h2>
+Legal Guidance
+</h2>
+
+<p>
+Understand your rights and available legal options.
+</p>
+
+<button onclick="focusIssue()">
+Get Help
+</button>
+
+</div>
+
+
+<div class="legal-card">
+
+<i class="fa-solid fa-file-lines"></i>
+
+<h2>
+Document Support
+</h2>
+
+<p>
+Get assistance with complaint and legal documents.
+</p>
+
+<button onclick="focusIssue()">
+Upload
+</button>
+
+</div>
+
+
+<div class="legal-card">
+
+<i class="fa-solid fa-comments"></i>
+
+<h2>
+AI Legal Assistant
+</h2>
+
+<p>
+Ask SafeConnect AI about your legal concern.
+</p>
+
+<button onclick="focusIssue()">
+Ask AI
+</button>
+
+</div>
+
+</div>
+
+
+<div class="legal-form">
+
+<h2>
+Describe Your Legal Issue
+</h2>
+
+<input
+id="userName"
+placeholder="Your Name"
+>
+
+<input
+id="issueCategory"
+placeholder="Issue Category"
+>
+
+<textarea
+id="legalIssue"
+placeholder="Explain your problem"
+rows="6"
+></textarea>
+
+<button
+id="submitButton"
+onclick="submitLegalRequest()"
+>
+
+<i class="fa-solid fa-paper-plane"></i>
+Submit Request
+
+</button>
+
+<div
+id="legalResult"
+style="margin-top:20px;"
+></div>
+
+</div>
+
+</div>
+
+
+<script>
+
+const API_URL = "http://127.0.0.1:8000";
+
+const token =
+localStorage.getItem("safeconnect_token");
+
+
+function focusIssue() {
+
+    document
+        .getElementById("legalIssue")
+        .focus();
+
+}
+
+
+async function submitLegalRequest() {
+
+    const issue =
+        document
+        .getElementById("legalIssue")
+        .value
+        .trim();
+
+    const category =
+        document
+        .getElementById("issueCategory")
+        .value
+        .trim();
+
+    const result =
+        document
+        .getElementById("legalResult");
+
+    const button =
+        document
+        .getElementById("submitButton");
+
+
+    if (!token) {
+
+        alert(
+            "Please login before using AI Legal Assistance."
+        );
+
+        window.location.href =
+            "login.html";
+
+        return;
+
+    }
+
+
+    if (!issue) {
+
+        result.innerHTML = `
+            <p>
+                Please describe your legal issue first.
+            </p>
+        `;
+
+        return;
+
+    }
+
+
+    button.disabled = true;
+
+    button.innerHTML =
+        '<i class="fa-solid fa-spinner fa-spin"></i> AI is analyzing...';
+
+
+    result.innerHTML =
+        "<p>SafeConnect AI is preparing your legal guidance...</p>";
+
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_URL}/legal/ask`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Authorization":
+                            `Bearer ${token}`,
+
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        question: issue,
+                        category: category
+                    })
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.detail ||
+                "Legal request failed"
+            );
+
+        }
+
+
+        const answer =
+            data.answer ||
+            data.response ||
+            data.message ||
+            JSON.stringify(data);
+
+
+        result.innerHTML = `
+
+            <div class="dash-card">
+
+                <h2>
+                    <i class="fa-solid fa-scale-balanced"></i>
+                    AI Legal Guidance
+                </h2>
+
+                <p>
+                    ${answer}
+                </p>
+
+                <p style="margin-top:15px;">
+                    <strong>Note:</strong>
+                    This AI provides general legal information
+                    and is not a substitute for professional legal advice.
+                </p>
+
+            </div>
+
+        `;
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Legal Assistant Error:",
+            error
+        );
+
+        result.innerHTML = `
+
+            <div class="dash-card">
+
+                <h2>
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    Unable to Process Request
+                </h2>
+
+                <p>
+                    ${error.message}
+                </p>
+
+            </div>
+
+        `;
+
+    }
+
+    finally {
+
+        button.disabled = false;
+
+        button.innerHTML =
+            '<i class="fa-solid fa-paper-plane"></i> Submit Request';
+
+    }
+
+}
+
+</script>
+
+</body>
+
+</html>

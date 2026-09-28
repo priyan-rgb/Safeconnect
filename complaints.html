@@ -1,0 +1,195 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>My Complaints | SafeConnect</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+
+<body>
+
+<div class="dashboard-page">
+
+<a href="dashboard.html" class="back-home">
+<i class="fa-solid fa-arrow-left"></i>
+Dashboard
+</a>
+
+<div class="dashboard-title">
+
+<h1>My Complaints</h1>
+
+<p>
+Track your complaints and their current status
+</p>
+
+</div>
+
+<div id="complaintsContainer">
+
+<p style="text-align:center;">
+Loading your complaints...
+</p>
+
+</div>
+
+</div>
+
+
+<script>
+
+const API_URL = "http://127.0.0.1:8000";
+
+const token = localStorage.getItem("safeconnect_token");
+
+
+// Check login
+
+if (!token) {
+
+    window.location.href = "login.html";
+
+}
+
+
+// Load complaints
+
+async function loadComplaints() {
+
+    const container =
+        document.getElementById("complaintsContainer");
+
+    try {
+
+        const response = await fetch(
+            `${API_URL}/complaints/`,
+            {
+                method: "GET",
+
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            }
+        );
+
+
+        if (!response.ok) {
+
+            container.innerHTML =
+                "<p style='text-align:center;'>Unable to load complaints.</p>";
+
+            return;
+
+        }
+
+
+        const complaints = await response.json();
+
+
+        if (complaints.length === 0) {
+
+            container.innerHTML =
+                "<p style='text-align:center;'>You have not submitted any complaints yet.</p>";
+
+            return;
+
+        }
+
+
+        container.innerHTML = "";
+
+
+        complaints.forEach(function(complaint) {
+
+            const card =
+                document.createElement("div");
+
+            card.className = "dash-card";
+
+            card.style.marginBottom = "20px";
+
+
+            card.innerHTML = `
+
+                <h2>
+                    <i class="fa-solid fa-file-circle-check"></i>
+                    ${complaint.title}
+                </h2>
+
+                <p>
+                    <strong>Complaint ID:</strong>
+                    #${complaint.id}
+                </p>
+
+                <p>
+                    <strong>Description:</strong>
+                    ${complaint.description}
+                </p>
+
+                <p>
+                    <strong>Location:</strong>
+                    ${complaint.location || "Not provided"}
+                </p>
+
+                <p>
+                    <strong>AI Category:</strong>
+                    ${complaint.ai_category || complaint.category || "General"}
+                </p>
+
+                <p>
+                    <strong>Priority:</strong>
+                    ${complaint.priority || "Not assigned"}
+                </p>
+
+                <p>
+                    <strong>Authority:</strong>
+                    ${complaint.authority || "Not assigned"}
+                </p>
+
+                <p>
+                    <strong>Status:</strong>
+                    <span class="active">
+                        ${complaint.status}
+                    </span>
+                </p>
+
+            `;
+
+
+            container.appendChild(card);
+
+        });
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        container.innerHTML =
+            "<p style='text-align:center;'>Cannot connect to SafeConnect backend.</p>";
+
+    }
+
+}
+
+
+loadComplaints();
+
+</script>
+
+</body>
+
+</html>
+```

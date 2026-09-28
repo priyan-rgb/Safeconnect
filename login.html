@@ -1,0 +1,215 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Login | SafeConnect</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+
+<body>
+
+<div class="login-page">
+
+<div class="login-ai">
+
+<div class="login-glow"></div>
+
+<div class="ai-logo">
+<i class="fa-solid fa-shield-heart"></i>
+</div>
+
+<h1>
+Welcome to
+<span>SafeConnect</span>
+</h1>
+
+<p>
+Your AI powered safety partner
+</p>
+
+<div class="security-item">
+<i class="fa-solid fa-user-shield"></i>
+24/7 Protection
+</div>
+
+<div class="security-item">
+<i class="fa-solid fa-robot"></i>
+AI Assistance
+</div>
+
+</div>
+
+<div class="login-card">
+
+<h2>Login</h2>
+
+<p>Access your SafeConnect account</p>
+
+<form id="loginForm">
+
+<div class="input-box">
+
+<i class="fa-solid fa-envelope"></i>
+
+<input
+id="email"
+type="email"
+placeholder="Email Address"
+required>
+
+</div>
+
+<div class="input-box">
+
+<i class="fa-solid fa-lock"></i>
+
+<input
+id="password"
+type="password"
+placeholder="Password"
+required>
+
+</div>
+
+<button type="submit" class="login-submit">
+Login
+</button>
+
+<p id="loginMessage" style="text-align:center; margin-top:15px;"></p>
+
+<p class="register-text">
+
+Don't have an account?
+
+<a href="register.html">
+Create Account
+</a>
+
+</p>
+
+</form>
+
+</div>
+
+</div>
+
+<script>
+
+const API_URL = "http://127.0.0.1:8000";
+
+const loginForm = document.getElementById("loginForm");
+const loginMessage = document.getElementById("loginMessage");
+
+loginForm.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    loginMessage.textContent = "Logging in...";
+
+    try {
+
+        const formData = new URLSearchParams();
+
+        formData.append("username", email);
+        formData.append("password", password);
+
+        const response = await fetch(
+            `${API_URL}/users/login`,
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+
+                body: formData
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            loginMessage.textContent =
+                data.detail || "Login failed.";
+
+            return;
+        }
+
+        localStorage.setItem(
+            "safeconnect_token",
+            data.access_token
+        );
+
+        loginMessage.textContent = "Login successful!";
+
+       setTimeout(async function() {
+
+    try {
+
+        const profileResponse = await fetch(
+            `${API_URL}/users/profile`,
+            {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${data.access_token}`
+                }
+            }
+        );
+
+        if (!profileResponse.ok) {
+            loginMessage.textContent = "Unable to get user profile.";
+            return;
+        }
+
+        const user = await profileResponse.json();
+
+        if (user.role === "admin") {
+            window.location.href = "admin.html";
+        } else {
+            window.location.href = "dashboard.html";
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+        loginMessage.textContent =
+            "Unable to determine user role.";
+
+    }
+
+}, 500);
+
+    } catch (error) {
+
+        console.error(error);
+
+        loginMessage.textContent =
+            "Cannot connect to SafeConnect backend.";
+
+    }
+
+});
+
+</script>
+
+</body>
+
+</html>
+```

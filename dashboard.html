@@ -1,0 +1,318 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Dashboard | SafeConnect</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+
+<body>
+
+<div class="dashboard-page">
+
+<a href="index.html" class="back-home">
+<i class="fa-solid fa-arrow-left"></i>
+Home
+</a>
+
+<div class="dashboard-title">
+
+<h1>
+Welcome to SafeConnect Dashboard
+</h1>
+
+<p>
+Your personal AI safety control center
+</p>
+
+</div>
+<div style="text-align:center; margin:25px 0;">
+
+<a href="complaint.html" class="primary">
+<i class="fa-solid fa-file-circle-plus"></i>
+Report New Complaint
+</a>
+
+</div>
+<div style="text-align:center; margin:25px 0;">
+
+<a href="complaints.html" class="primary">
+<i class="fa-solid fa-list-check"></i>
+My Complaints
+</a>
+
+</div>
+<div class="dashboard-grid">
+
+<!-- PROFILE -->
+
+<div class="dash-card profile-card">
+
+<div class="profile-icon">
+<i class="fa-solid fa-user"></i>
+</div>
+
+<h2>User Profile</h2>
+
+<p>
+Name:
+<span id="userName">Loading...</span>
+</p>
+
+<p>
+Email:
+<span id="userEmail">Loading...</span>
+</p>
+
+<p>
+Status:
+<span class="active">Protected</span>
+</p>
+
+</div>
+
+
+<!-- SAFETY SCORE -->
+
+<div class="dash-card">
+
+<i class="fa-solid fa-shield-heart dash-icon"></i>
+
+<h2>Safety Score</h2>
+
+<div class="score">
+92%
+</div>
+
+<p>
+Excellent Protection
+</p>
+
+</div>
+
+
+<!-- EMERGENCY -->
+
+<div class="dash-card">
+
+<i class="fa-solid fa-clock-rotate-left dash-icon"></i>
+
+<h2>Emergency History</h2>
+
+<p id="emergencyText">
+Checking emergency history...
+</p>
+
+<p>
+Last check: Today
+</p>
+
+</div>
+
+
+<!-- COMPLAINTS -->
+
+<div class="dash-card">
+
+<i class="fa-solid fa-file-circle-check dash-icon"></i>
+
+<h2>Complaints</h2>
+
+<p>
+Total Complaints:
+<span id="totalComplaints">0</span>
+</p>
+
+<p>
+Resolved:
+<span id="resolvedComplaints">0</span>
+</p>
+
+<p>
+Pending / Active:
+<span id="activeComplaints">0</span>
+</p>
+
+</div>
+
+</div>
+
+
+<!-- AI RECOMMENDATION -->
+
+<div class="ai-recommend">
+
+<i class="fa-solid fa-robot"></i>
+
+<div>
+
+<h2>
+AI Recommendation
+</h2>
+
+<p id="aiRecommendation">
+Loading your personalized safety recommendation...
+</p>
+
+</div>
+
+</div>
+
+
+</div>
+
+
+<script>
+
+const API_URL = "http://127.0.0.1:8000";
+
+const token = localStorage.getItem("safeconnect_token");
+
+
+// Check whether user is logged in
+
+if (!token) {
+
+    window.location.href = "login.html";
+
+}
+
+
+// Load dashboard information
+
+async function loadDashboard() {
+
+    try {
+
+        // Get user profile
+
+        const profileResponse = await fetch(
+            `${API_URL}/users/profile`,
+            {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            }
+        );
+
+
+        if (!profileResponse.ok) {
+
+            localStorage.removeItem("safeconnect_token");
+
+            window.location.href = "login.html";
+
+            return;
+
+        }
+
+
+        const user = await profileResponse.json();
+
+
+        document.getElementById("userName").textContent =
+            user.full_name || "User";
+
+        document.getElementById("userEmail").textContent =
+            user.email || "Not available";
+
+
+        // Get user's complaints
+
+        const complaintsResponse = await fetch(
+            `${API_URL}/complaints/`,
+            {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            }
+        );
+
+
+        if (complaintsResponse.ok) {
+
+            const complaints = await complaintsResponse.json();
+
+
+            const total = complaints.length;
+
+            const resolved = complaints.filter(
+                complaint => complaint.status === "Resolved"
+            ).length;
+
+
+            const active = total - resolved;
+
+
+            document.getElementById("totalComplaints").textContent =
+                total;
+
+            document.getElementById("resolvedComplaints").textContent =
+                resolved;
+
+            document.getElementById("activeComplaints").textContent =
+                active;
+
+
+            if (total === 0) {
+
+                document.getElementById("aiRecommendation").textContent =
+                    "Your account is ready. Keep your emergency contacts updated and use SafeConnect whenever you need assistance.";
+
+            } else if (active > 0) {
+
+                document.getElementById("aiRecommendation").textContent =
+                    "You have active complaints being processed. Check your complaint status regularly and keep your emergency contacts updated.";
+
+            } else {
+
+                document.getElementById("aiRecommendation").textContent =
+                    "All your current complaints are resolved. Keep your emergency contacts updated and stay protected.";
+
+            }
+
+        }
+
+
+        // Emergency information
+
+        document.getElementById("emergencyText").textContent =
+            "Emergency services available";
+
+
+    } catch (error) {
+
+        console.error("Dashboard error:", error);
+
+        document.getElementById("aiRecommendation").textContent =
+            "Unable to load some dashboard information.";
+
+    }
+
+}
+
+
+// Start dashboard
+
+loadDashboard();
+
+</script>
+
+</body>
+
+</html>
+```

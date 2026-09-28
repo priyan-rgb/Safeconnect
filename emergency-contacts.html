@@ -1,0 +1,180 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Emergency Contacts | SafeConnect</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+
+<body>
+
+<div class="dashboard-page">
+
+<a href="dashboard.html" class="back-home">
+<i class="fa-solid fa-arrow-left"></i>
+Dashboard
+</a>
+
+<div class="dashboard-title">
+
+<h1>Emergency Contacts</h1>
+
+<p>
+Your trusted contacts for emergency situations
+</p>
+
+</div>
+
+<div id="contactsContainer">
+
+<p style="text-align:center;">
+Loading emergency contacts...
+</p>
+
+</div>
+
+</div>
+
+
+<script>
+
+const API_URL = "http://127.0.0.1:8000";
+
+const token = localStorage.getItem("safeconnect_token");
+
+
+if (!token) {
+
+    window.location.href = "login.html";
+
+}
+
+
+async function loadContacts() {
+
+    const container =
+        document.getElementById("contactsContainer");
+
+    try {
+
+        const response = await fetch(
+            `${API_URL}/emergency-contacts/`,
+            {
+                method: "GET",
+
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            }
+        );
+
+
+        const data = await response.json();
+
+
+        if (!response.ok) {
+
+            container.innerHTML =
+                "<p style='text-align:center;'>Unable to load emergency contacts.</p>";
+
+            return;
+
+        }
+
+
+        // Backend returns:
+        // { user_id: ..., contacts: [...] }
+
+        const contacts = data.contacts || [];
+
+
+        if (contacts.length === 0) {
+
+            container.innerHTML =
+                "<p style='text-align:center;'>No emergency contacts added yet.</p>";
+
+            return;
+
+        }
+
+
+        container.innerHTML = "";
+
+
+        contacts.forEach(function(contact) {
+
+            const card =
+                document.createElement("div");
+
+            card.className = "dash-card";
+
+            card.style.marginBottom = "20px";
+
+
+            card.innerHTML = `
+
+                <h2>
+                    <i class="fa-solid fa-user-shield"></i>
+                    ${contact.name}
+                </h2>
+
+                <p>
+                    <strong>Relationship:</strong>
+                    ${contact.relationship}
+                </p>
+
+                <p>
+                    <strong>Phone:</strong>
+                    ${contact.phone}
+                </p>
+
+                <a
+                    href="tel:${contact.phone}"
+                    class="primary"
+                    style="display:inline-block; margin-top:10px;">
+
+                    <i class="fa-solid fa-phone"></i>
+                    Call Contact
+
+                </a>
+
+            `;
+
+
+            container.appendChild(card);
+
+        });
+
+
+    } catch (error) {
+
+        console.error("Emergency contacts error:", error);
+
+        container.innerHTML =
+            "<p style='text-align:center;'>Cannot connect to SafeConnect backend.</p>";
+
+    }
+
+}
+
+
+loadContacts();
+
+</script>
+
+</body>
+
+</html>
+```
